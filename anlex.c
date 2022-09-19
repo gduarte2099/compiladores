@@ -14,6 +14,7 @@
 #include "anlex.h"
 
 
+
 /************* Variables globales **************/
 
 int consumir;			/* 1 indica al analizador lexico que debe devolver
@@ -53,11 +54,12 @@ void getToken()
 	while((c=fgetc(archivo))!=EOF)
 	{
 		
-		if (c==' ' || c=='\t')
-			continue;	//eliminar espacios en blanco
+		if (c==' ')
+			printf(" ");
 		else if(c=='\n')
 		{
 			//incrementar el numero de linea
+			printf("\n");
 			numLinea++;
 			continue;
 		}
@@ -71,7 +73,7 @@ void getToken()
 				c=fgetc(archivo);
 				if (i>=TAMLEX)
 					error("Longitud de Identificador excede tamaño de buffer");
-			}while(isalpha(c) || isdigit(c));
+			}while(isalpha(c) || isdigit(c) || c==' '); //No se porque me funciona asi, pero bueno, de lo contrario un string de 2 palabras como "Juan Perez" me lo escribe STRING STRING
 			lexema[i]='\0';
 			if (c!=EOF)
 				ungetc(c,archivo);
@@ -82,10 +84,10 @@ void getToken()
 			if (t.pe->compLex==-1)
 			{
 				strcpy(e.lexema,lexema);
-				e.compLex=ID;
+				e.compLex=STRING;
 				insertar(e);
 				t.pe=buscar(lexema);
-				t.compLex=ID;
+				t.compLex=STRING;
 			}
 			break;
 		}
@@ -203,11 +205,11 @@ void getToken()
 						if (t.pe->compLex==-1)
 						{
 							strcpy(e.lexema,lexema);
-							e.compLex=NUM;
+							e.compLex=NUMBER;
 							insertar(e);
 							t.pe=buscar(lexema);
 						}
-						t.compLex=NUM;
+						t.compLex=NUMBER;
 						break;
 					case -1:
 						if (c==EOF)
@@ -219,7 +221,7 @@ void getToken()
 				}
 			break;
 		}
-		else if (c=='<') 
+		/*else if (c=='<') 
 		{
 			//es un operador relacional, averiguar cual
 			c=fgetc(archivo);
@@ -253,23 +255,14 @@ void getToken()
 				t.pe=buscar(">");
 			}
 			break;
-		}
+		}*/
 		else if (c==':')
 		{
-			//puede ser un : o un operador de asignacion
-			c=fgetc(archivo);
-			if (c=='='){
-				t.compLex=OPASIGNA;
-				t.pe=buscar(":=");
-			}
-			else{
-				ungetc(c,archivo);
-				t.compLex=':';
-				t.pe=buscar(":");
-			}
+			t.compLex= DOS_PUNTOS;
+			t.pe=buscar(":");
 			break;
 		}
-		else if (c=='+')
+		/*else if (c=='+')
 		{
 			t.compLex=OPSUMA;
 			t.pe=buscar("+");
@@ -298,14 +291,14 @@ void getToken()
 			t.compLex=OPREL;
 			t.pe=buscar("=");
 			break;
-		}
+		}*/
 		else if (c==',')
 		{
-			t.compLex=',';
+			t.compLex= COMA;
 			t.pe=buscar(",");
 			break;
 		}
-		else if (c==';')
+		/*else if (c==';')
 		{
 			t.compLex=';';
 			t.pe=buscar(";");
@@ -316,8 +309,8 @@ void getToken()
 			t.compLex='.';
 			t.pe=buscar(".");
 			break;
-		}
-		else if (c=='(')
+		}*/
+		/*else if (c=='(')
 		{
 			if ((c=fgetc(archivo))=='*')
 			{//es un comentario
@@ -344,40 +337,52 @@ void getToken()
 			else
 			{
 				ungetc(c,archivo);
-				t.compLex='(';
+				t.compLex= L_PARENTESIS;
 				t.pe=buscar("(");
 			}
 			break;
 		}
 		else if (c==')')
 		{
-			t.compLex=')';
+			t.compLex= R_PARENTESIS;
 			t.pe=buscar(")");
 			break;
-		}
+		}*/
 		else if (c=='[')
 		{
-			t.compLex='[';
+			t.compLex= L_CORCHETE;
 			t.pe=buscar("[");
 			break;
 		}
 		else if (c==']')
 		{
-			t.compLex=']';
+			t.compLex= R_CORCHETE;
 			t.pe=buscar("]");
 			break;
 		}
-		else if (c=='\'')
+		else if (c=='{')
+		{
+			t.compLex= L_LLAVE;
+			t.pe=buscar("{");
+			break;
+		}
+		else if (c=='}')
+		{
+			t.compLex= R_LLAVE;
+			t.pe=buscar("}");
+			break;
+		}
+		/*else if (c=='\')
 		{//un caracter o una cadena de caracteres
 			i=0;
 			lexema[i]=c;
 			i++;
 			do{
 				c=fgetc(archivo);
-				if (c=='\'')
+				if (c=='\')
 				{
 					c=fgetc(archivo);
-					if (c=='\'')
+					if (c=='\')
 					{
 						lexema[i]=c;
 						i++;
@@ -386,7 +391,7 @@ void getToken()
 					}
 					else
 					{
-						lexema[i]='\'';
+						lexema[i]='\';
 						i++;
 						break;
 					}
@@ -411,16 +416,16 @@ void getToken()
 			{
 				strcpy(e.lexema,lexema);
 				if (strlen(lexema)==3 || strcmp(lexema,"''''")==0)
-					e.compLex=CAR;
+					e.compLex=CHAR;
 				else
-					e.compLex=LITERAL;
+					e.compLex=STRING;
 				insertar(e);
 				t.pe=buscar(lexema);
 				t.compLex=e.compLex;
 			}
 			break;
 		}
-		else if (c=='{')
+		/*else if (c=='{')
 		{
 			//elimina el comentario
 			while(c!=EOF)
@@ -441,7 +446,7 @@ void getToken()
 		{
 			sprintf(msg,"%c no esperado",c);
 			error(msg);
-		}
+		}*/
 	}
 	if (c==EOF)
 	{
@@ -453,6 +458,7 @@ void getToken()
 	
 }
 
+/***************************************MAIN****************************************/
 int main(int argc,char* args[])
 {
 	// inicializar analizador lexico
@@ -460,16 +466,16 @@ int main(int argc,char* args[])
 	initTabla();
 	initTablaSimbolos();
 	
-	if(argc > 1)
+	if(argc >= 0)
 	{
-		if (!(archivo=fopen(args[1],"rt")))
+		if (!(archivo=fopen("fuente.txt", "r")))
 		{
 			printf("Archivo no encontrado.\n");
 			exit(1);
 		}
 		while (t.compLex!=EOF){
 			getToken();
-			printf("Lin %d: %s -> %d\n",numLinea,t.pe->lexema,t.compLex);
+			printf("%s ",t.compLex);
 		}
 		fclose(archivo);
 	}else{
@@ -478,4 +484,173 @@ int main(int argc,char* args[])
 	}
 
 	return 0;
+}
+
+entrada *tabla;				//declarar la tabla de simbolos
+int tamTabla=TAMHASH;		//utilizado para cuando se debe hacer rehash
+int elems=0;				//utilizado para cuando se debe hacer rehash
+
+int h(const char* k, int m)
+{
+	unsigned h=0,g;
+	int i;
+	for (i=0;i<strlen(k);i++)
+	{
+		h=(h << 4) + k[i];
+		if ( (g=h&0xf0000000) ){
+			h=h^(g>>24);
+			h=h^g;
+		}
+	}
+	return h%m;
+}
+
+void initTabla() //inicializa la tabla de simbolos 
+{	
+	int i=0;
+	
+	tabla=(entrada*)malloc(tamTabla*sizeof(entrada));
+	for(i=0;i<tamTabla;i++)
+	{
+		tabla[i].compLex=-1;
+	}
+}
+
+int esprimo(int n)
+{
+	int i;
+	for(i=3;i*i<=n;i+=2)
+		if (n%i==0)
+			return 0;
+	return 1;
+}
+
+int siguiente_primo(int n)
+{
+	if (n%2==0)
+		n++;
+	for (;!esprimo(n);n+=2);
+
+	return n;
+}
+
+//en caso de que la tabla llegue al limite, duplicar el tamaÃ±o
+void rehash()
+{
+	entrada *vieja;
+	int i;
+	vieja=tabla;
+	tamTabla=siguiente_primo(2*tamTabla);
+	initTabla();
+	for (i=0;i<tamTabla/2;i++)
+	{
+		if(vieja[i].compLex!=-1)
+			insertar(vieja[i]);
+	}		
+	free(vieja);
+}
+
+//insertar una entrada en la tabla
+void insertar(entrada e)
+{
+	int pos;
+	if (++elems>=tamTabla/2)
+		rehash();
+	pos=h(e.lexema,tamTabla);
+	while (tabla[pos].compLex!=-1)
+	{
+		pos++;
+		if (pos==tamTabla)
+			pos=0;
+	}
+	tabla[pos]=e;
+
+}
+//busca una clave en la tabla, si no existe devuelve NULL, posicion en caso contrario
+entrada* buscar(const char *clave)
+{
+	int pos;
+	pos=h(clave,tamTabla);
+	while(tabla[pos].compLex!=-1 && strcmp(tabla[pos].lexema,clave)!=0 )
+	{
+		pos++;
+		if (pos==tamTabla)
+			pos=0;
+	}
+	return &tabla[pos];
+}
+
+void insertTablaSimbolos(const char *s, char *cadena)
+{
+	entrada e;
+	//printf("%s",cadena);
+	strcpy(e.lexema,s);
+	//printf(e.lexema,s);
+	e.compLex=cadena;
+	insertar(e);
+}
+
+void initTablaSimbolos()
+{
+	/*int i;
+	const char *vector[]={
+		"main",
+		"type",
+		"var",
+		"array",
+		"begin",
+		"end",
+		"do",
+		"to",
+		"downto",
+		"then",
+		"of",
+		"function",
+		"procedure", 
+		"integer", 
+		"real", 
+		"boolean", 
+		"char", 
+		"for", 
+		"if", 
+		"else", 
+		"while", 
+		"repeat", 
+		"until", 
+		"case", 
+		"record", 
+		"writeln",
+		"write",
+		"const"
+	};
+ 	for (i=0;i<28;i++)
+	{
+		insertTablaSimbolos(vector[i],i+256);
+	}*/
+	insertTablaSimbolos(",", COMA);
+	insertTablaSimbolos(".",'.');
+	insertTablaSimbolos(":", DOS_PUNTOS);
+	insertTablaSimbolos(";",';');
+	insertTablaSimbolos("(", L_PARENTESIS);
+	insertTablaSimbolos(")", R_PARENTESIS);
+	insertTablaSimbolos("[", L_CORCHETE);
+	insertTablaSimbolos("]", R_CORCHETE);
+	insertTablaSimbolos("{", L_LLAVE);
+	insertTablaSimbolos("}", R_LLAVE);
+	insertTablaSimbolos("true",TRUE);
+	insertTablaSimbolos("false",FALSE);
+	/*insertTablaSimbolos("not",NOT);
+	insertTablaSimbolos("<",OPREL);
+	insertTablaSimbolos("<=",OPREL);
+	insertTablaSimbolos("<>",OPREL);
+	insertTablaSimbolos(">",OPREL);
+	insertTablaSimbolos(">=",OPREL);
+	insertTablaSimbolos("=",OPREL);
+	insertTablaSimbolos("+",OPSUMA);
+	insertTablaSimbolos("-",OPSUMA);
+	insertTablaSimbolos("or",OPSUMA);
+	insertTablaSimbolos("*",OPMULT);
+	insertTablaSimbolos("/",OPMULT);
+	insertTablaSimbolos("div",OPMULT);
+	insertTablaSimbolos("mod",OPMULT);*/
 }

@@ -7,6 +7,7 @@
 /************* Definiciones ********************/
 
 //Codigos
+/*
 #define PROGRAM		256
 #define TYPE		257
 #define VAR			258
@@ -35,17 +36,40 @@
 #define WRITELN		281
 #define WRITE		282
 #define CONST		283
-#define NUM			284
+#define NUMBER		284
 #define ID			285
-#define BOOL		286
-#define CAR			287
-#define LITERAL		288
+#define TRUE		286
+#define FALSE		287
+#define STRING		288
 #define NOT			289
 #define OPREL		290
 #define OPSUMA		291
 #define OPMULT		292
-#define OPASIGNA	293
+#define DOS_PUNTOS	293
 #define USER_TYPE	294
+#define L_CORCHETE	295
+#define R_CORCHETE	296
+#define COMA		297
+#define L_LLAVE		298
+#define R_LLAVE		299
+#define L_PARENTESIS	300
+#define R_PARENTESIS	301
+#define CAR 302*/
+#define DOS_PUNTOS	"DOS_PUNTOS"
+#define L_CORCHETE	"L_CORCHETE"
+#define R_CORCHETE	"R_CORCHETE"
+#define COMA		"COMA"
+#define L_LLAVE		"L_LLAVE"
+#define R_LLAVE		"R_LLAVE"
+#define L_PARENTESIS	"L_PARENTESIS"
+#define R_PARENTESIS	"R_PARENTESIS"
+#define NUMBER "NUMBER"
+#define TRUE		"PR_TRUE"
+#define FALSE		"PR_FALSE"
+#define STRING		"STRING"
+#define CHAR	"CHAR"
+#define PR_NULL	"NULL"
+
 // Fin Codigos
 #define TAMBUFF 	5
 #define TAMLEX 		50
@@ -55,7 +79,8 @@
 
 typedef struct entrada{
 	//definir los campos de 1 entrada de la tabla de simbolos
-	int compLex;
+	char *compLex;
+	
 	char lexema[TAMLEX];	
 	struct entrada *tipoDato; // null puede representar variable no declarada	
 	// aqui irian mas atributos para funciones y procedimientos...
@@ -63,7 +88,7 @@ typedef struct entrada{
 } entrada;
 
 typedef struct {
-	int compLex;
+	char *compLex;
 	entrada *pe;
 } token;
 
